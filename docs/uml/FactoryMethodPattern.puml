@@ -1,0 +1,49 @@
+@startuml
+' Project example: EnemyFactory hierarchy
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+left to right direction
+
+title Factory Method Pattern Structural Class Diagram
+
+class Client
+
+abstract class EnemyFactory <<Creator>> {
+  + createEnemy(random: Random, playfieldWidth: int): Enemy
+}
+
+class MobEnemyFactory
+class EliteEnemyFactory
+class ElitePlusEnemyFactory
+class AceEnemyFactory
+class BossEnemyFactory
+
+abstract class Enemy <<Product>>
+class MobEnemy
+class EliteEnemy
+class ElitePlusEnemy
+class AceEnemy
+class BossEnemy
+
+Client ..> EnemyFactory : createEnemy(...)
+
+EnemyFactory <|-- MobEnemyFactory
+EnemyFactory <|-- EliteEnemyFactory
+EnemyFactory <|-- ElitePlusEnemyFactory
+EnemyFactory <|-- AceEnemyFactory
+EnemyFactory <|-- BossEnemyFactory
+
+Enemy <|-- MobEnemy
+Enemy <|-- EliteEnemy
+Enemy <|-- ElitePlusEnemy
+Enemy <|-- AceEnemy
+Enemy <|-- BossEnemy
+
+MobEnemyFactory ..> MobEnemy
+EliteEnemyFactory ..> EliteEnemy
+ElitePlusEnemyFactory ..> ElitePlusEnemy
+AceEnemyFactory ..> AceEnemy
+BossEnemyFactory ..> BossEnemy
+
+@enduml

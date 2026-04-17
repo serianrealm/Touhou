@@ -1,0 +1,27 @@
+@startuml
+' Standard singleton pattern structure
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+left to right direction
+
+title Singleton Pattern Structural Class Diagram
+
+class Client
+
+class Singleton <<Singleton>> {
+  - {static} instance: Singleton
+  - Singleton()
+  + {static} getInstance(): Singleton
+  + businessOperation(): void
+}
+
+Client ..> Singleton : getInstance()
+
+note right of Singleton
+  Only one instance exists.
+  Global access is provided
+  through getInstance().
+end note
+
+@enduml

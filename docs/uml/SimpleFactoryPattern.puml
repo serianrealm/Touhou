@@ -1,0 +1,45 @@
+@startuml
+' Project example: ItemFactory
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+left to right direction
+
+title Simple Factory Pattern Structural Class Diagram
+
+class Client
+
+class ItemFactory <<SimpleFactory>> {
+  + {static} create(type: ItemType, x: int, y: int): Item
+  + {static} createDrops(enemy: Enemy, random: Random): List<Item>
+}
+
+abstract class Item {
+  + activate(hero: Hero, context: ItemEffectContext): void
+}
+
+class HealthItem
+class FirepowerItem
+class SuperFirepowerItem
+class BombItem
+class FreezeItem
+
+enum ItemType
+
+Client ..> ItemFactory : create(...)
+ItemFactory ..> ItemType : selects by
+ItemFactory ..> Item : returns
+
+Item <|-- HealthItem
+Item <|-- FirepowerItem
+Item <|-- SuperFirepowerItem
+Item <|-- BombItem
+Item <|-- FreezeItem
+
+ItemFactory ..> HealthItem
+ItemFactory ..> FirepowerItem
+ItemFactory ..> SuperFirepowerItem
+ItemFactory ..> BombItem
+ItemFactory ..> FreezeItem
+
+@enduml

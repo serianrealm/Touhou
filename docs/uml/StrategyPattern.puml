@@ -1,0 +1,44 @@
+@startuml
+' Project example: aircraft firing behavior
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+left to right direction
+
+title Strategy Pattern Structural Class Diagram
+
+class Client
+
+interface FireStrategy <<Strategy>> {
+  + fire(aircraft: Aircraft): List<Projectile>
+}
+
+class SingleForwardFireStrategy
+class StraightRowFireStrategy
+class SpreadShotStrategy
+class FanShotStrategy
+class RadialShotStrategy
+
+abstract class Aircraft <<Context>> {
+  - fireStrategy: FireStrategy
+  + tryFire(): List<Projectile>
+  + setFireStrategy(strategy: FireStrategy): void
+  + getFireStrategy(): FireStrategy
+}
+
+class Hero
+abstract class Enemy
+
+Client ..> Aircraft : configures
+Aircraft ..> FireStrategy : delegates to
+
+FireStrategy <|.. SingleForwardFireStrategy
+FireStrategy <|.. StraightRowFireStrategy
+FireStrategy <|.. SpreadShotStrategy
+FireStrategy <|.. FanShotStrategy
+FireStrategy <|.. RadialShotStrategy
+
+Aircraft <|-- Hero
+Aircraft <|-- Enemy
+
+@enduml

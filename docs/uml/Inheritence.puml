@@ -1,0 +1,100 @@
+@startuml
+' Current system inheritance structure
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+left to right direction
+
+title Touhou System Inheritance Class Diagram
+
+abstract class GameCharacter {
+  - x: int
+  - y: int
+  - width: int
+  - height: int
+  - velocityX: int
+  - velocityY: int
+  - maxHealth: int
+  - health: int
+  + tick(): void
+  + applyDamage(damage: int): void
+  + heal(amount: int): void
+  + vanish(): void
+}
+
+abstract class Aircraft {
+  - fireStrategy: FireStrategy
+  - projectileOwner: Projectile.Owner
+  - projectileDamage: int
+  - fireIntervalTicks: int
+  - fireCooldown: int
+  + tryFire(): List<Projectile>
+  + setFireStrategy(strategy: FireStrategy): void
+}
+
+class Hero {
+  + moveTo(x: int, y: int): void
+  + applyHealthSupply(): void
+  + applyFirepowerSupply(durationSeconds: int): void
+  + applySuperFirepowerSupply(durationSeconds: int): void
+  + restoreDefaultWeapon(): void
+}
+
+abstract class Enemy {
+  - scoreValue: int
+  - dropChance: double
+  - droppableItems: List<ItemType>
+  - frozenTicks: int
+  + freeze(ticks: int): void
+  + isFrozen(): boolean
+  + advance(playfieldWidth: int, playfieldHeight: int): void
+}
+
+class MobEnemy
+class EliteEnemy
+class ElitePlusEnemy
+class AceEnemy
+class BossEnemy
+
+abstract class Item {
+  - type: ItemType
+  + activate(hero: Hero, context: ItemEffectContext): void
+}
+
+class HealthItem
+class FirepowerItem
+class SuperFirepowerItem
+class BombItem
+class FreezeItem
+
+class Projectile {
+  - damage: int
+  - owner: Owner
+}
+
+interface FireStrategy
+
+GameCharacter <|-- Aircraft
+GameCharacter <|-- Item
+GameCharacter <|-- Projectile
+
+Aircraft <|-- Hero
+Aircraft <|-- Enemy
+
+Enemy <|-- MobEnemy
+Enemy <|-- EliteEnemy
+Enemy <|-- ElitePlusEnemy
+Enemy <|-- AceEnemy
+Enemy <|-- BossEnemy
+
+Item <|-- HealthItem
+Item <|-- FirepowerItem
+Item <|-- SuperFirepowerItem
+Item <|-- BombItem
+Item <|-- FreezeItem
+
+Aircraft ..> FireStrategy : uses
+Enemy ..> ItemType : drops
+Item ..> ItemEffectContext : activates with
+
+@enduml

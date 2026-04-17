@@ -1,0 +1,40 @@
+@startuml
+' Project example: leaderboard persistence
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+left to right direction
+
+title DAO Pattern Structural Class Diagram
+
+class Game <<Client>>
+
+interface LeaderboardDao <<DAO>> {
+  + save(difficulty: GameDifficulty, entry: LeaderboardEntry): void
+  + findAll(difficulty: GameDifficulty): List<LeaderboardEntry>
+}
+
+class FileLeaderboardDao
+
+class LeaderboardEntry <<Entity>> {
+  + playerName: String
+  + score: int
+  + playedAt: LocalDateTime
+}
+
+enum GameDifficulty
+
+class LeaderboardFiles <<Data Source>> {
+  + leaderboard-easy.tsv
+  + leaderboard-normal.tsv
+  + leaderboard-hard.tsv
+}
+
+Game ..> LeaderboardDao : uses
+LeaderboardDao <|.. FileLeaderboardDao
+
+LeaderboardDao ..> LeaderboardEntry
+LeaderboardDao ..> GameDifficulty
+FileLeaderboardDao ..> LeaderboardFiles : read/write
+
+@enduml
