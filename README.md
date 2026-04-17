@@ -1,83 +1,60 @@
-# Workspace Layout
+# Repository
 
-Running tree .
-```text
-.
-├── apps/
-│   ├── build.gradle
-│   └── src/
-│       ├── main/java/...
-│       └── test/java/...
-├── build-logic/
-│   ├── build.gradle
-│   └── src/main/groovy/
-│       ├── com.example.java-application-conventions.gradle
-│       ├── com.example.java-common-conventions.gradle
-│       └── com.example.java-library-conventions.gradle
-├── gradle/
-│   ├── libs.versions.toml
-│   └── wrapper/
-├── libraries/
-│   ├── domain/
-│   │   └── commons/
-│   │       ├── build.gradle
-│   │       └── src/
-│   │           ├── main/java/...
-│   │           └── test/java/...
-│   └── platform/
-│       ├── bootstrap/
-│       │   ├── build.gradle
-│       │   └── src/
-│       │       ├── main/java/...
-│       │       └── test/java/...
-│       └── data-access/
-│           ├── build.gradle
-│           └── src/
-│               ├── main/java/...
-│               └── test/java/...
-├── build.gradle
-├── gradle.properties
-├── settings.gradle
-├── gradlew
-└── gradlew.bat
+<p align="center">
+  <strong>Language: <a href="README.md">English</a> | <a href="docs/README_zh.md">中文</a></strong>
+</p>
 
-112 directories, 262 files
-```
+This repository is my Software Construction homework. The project is a Java application built with Gradle.
 
-# How to work with this workspace
+## Requirements
 
-Run everything from the repository root:
+- JDK 25
+- Gradle Wrapper included in this repository
+
+## Build
+
+Run from the repository root:
 
 ```bash
 ./gradlew build
+```
+
+## Test
+
+Run all tests from the repository root:
+
+```bash
 ./gradlew test
+```
+
+## Run
+
+Start the application from the repository root:
+
+```bash
 ./gradlew :apps:run
 ```
 
-Run individual modules when needed:
+## UML
 
-```bash
-./gradlew :libraries:domain:commons:test
-./gradlew :libraries:platform:data-access:build
-./gradlew :libraries:platform:bootstrap:test
+- PlantUML source files are located in `docs/uml/`.
+- The compatibility PNG backup directory is `docs/uml_png/`.
+
+## Project Structure
+
+```text
+.
+├── apps/          # Application source code and tests
+├── docs/          # Project documentation
+│   ├── uml/       # PlantUML files
+│   └── uml_png/   # PNG backup directory for compatibility
+├── gradle/        # Gradle wrapper files
+├── build.gradle
+├── settings.gradle
+├── gradlew
+└── gradlew.bat
 ```
 
-# Trouble Shooting
-## X11 not Found
-`java.lang.UnsatisfiedLinkError: ... libawt_xawt.so: libX11.so.6: cannot open shared object file`
+## Note
 
-Run
-```sh
-sudo apt update
-sudo apt install -y libx11-6 libxext6 libxrender1 libxtst6 libxi6 libxrandr2 libxcursor1 libxinerama1 libfontconfig1
-```
-
-## UML Display Error
-Run
-```sh
-sudo apt update
-sudo apt install graphviz
-```
-
-# NOTE
-This work supports only for my software construction class only. Built with gradle.
+This project is for coursework and educational use.

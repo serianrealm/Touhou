@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.touhou.audio.AudioManager;
@@ -21,13 +23,23 @@ import com.touhou.factories.ItemFactory;
 import com.touhou.observer.PowerUpDispatcher;
 
 class CollisionSystemTest {
+    @BeforeEach
+    void setUp() {
+        Hero.resetInstance();
+    }
+
+    @AfterEach
+    void tearDown() {
+        Hero.resetInstance();
+    }
+
     @Test
     void overlapsReturnsTrueForIntersectingBounds() {
         CollisionSystem collisionSystem = new CollisionSystem(
                 new AudioManager(),
                 new ItemEffectContext(new AudioManager(), new NormalDifficultyTemplate(), new PowerUpDispatcher()),
                 new Random(0));
-        Hero hero = new Hero(100, 100);
+        Hero hero = Hero.getInstance(100, 100);
         Enemy enemy = new BossEnemy(100, 0);
 
         assertTrue(collisionSystem.overlaps(hero, enemy));
@@ -39,7 +51,7 @@ class CollisionSystemTest {
                 new AudioManager(),
                 new ItemEffectContext(new AudioManager(), new NormalDifficultyTemplate(), new PowerUpDispatcher()),
                 new Random(0));
-        Hero hero = new Hero(200, 400);
+        Hero hero = Hero.getInstance(200, 400);
         List<Enemy> enemies = new ArrayList<>();
         List<Projectile> projectiles = new ArrayList<>();
         List<Item> items = new ArrayList<>();
@@ -61,7 +73,7 @@ class CollisionSystemTest {
                 new AudioManager(),
                 new ItemEffectContext(new AudioManager(), new NormalDifficultyTemplate(), new PowerUpDispatcher()),
                 new Random(0));
-        Hero hero = new Hero(200, 400);
+        Hero hero = Hero.getInstance(200, 400);
         hero.applyDamage(3);
 
         List<Enemy> enemies = new ArrayList<>();
@@ -81,7 +93,7 @@ class CollisionSystemTest {
                 new AudioManager(),
                 new ItemEffectContext(new AudioManager(), new NormalDifficultyTemplate(), new PowerUpDispatcher()),
                 new Random(0));
-        Hero hero = new Hero(200, 400);
+        Hero hero = Hero.getInstance(200, 400);
         List<Enemy> enemies = new ArrayList<>();
         List<Projectile> projectiles = new ArrayList<>();
         List<Item> items = new ArrayList<>();

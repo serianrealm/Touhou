@@ -3,12 +3,24 @@ package com.touhou.components;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class HeroTest {
+    @BeforeEach
+    void setUp() {
+        Hero.resetInstance();
+    }
+
+    @AfterEach
+    void tearDown() {
+        Hero.resetInstance();
+    }
+
     @Test
     void moveToUpdatesHeroPosition() {
-        Hero hero = new Hero(100, 200);
+        Hero hero = Hero.getInstance(100, 200);
 
         hero.moveTo(300, 450);
 
@@ -18,7 +30,7 @@ class HeroTest {
 
     @Test
     void applyDamageFromParentClassReducesHealth() {
-        Hero hero = new Hero(100, 200);
+        Hero hero = Hero.getInstance(100, 200);
 
         hero.applyDamage(3);
 
@@ -27,7 +39,7 @@ class HeroTest {
 
     @Test
     void tickFromParentClassAdvancesFireCooldown() {
-        Hero hero = new Hero(100, 200);
+        Hero hero = Hero.getInstance(100, 200);
 
         assertEquals(1, hero.tryFire().size());
         assertTrue(hero.tryFire().isEmpty());
@@ -41,7 +53,7 @@ class HeroTest {
 
     @Test
     void healthSupplyDoesNotExceedMaximumHealth() {
-        Hero hero = new Hero(100, 200);
+        Hero hero = Hero.getInstance(100, 200);
         hero.applyDamage(1);
 
         hero.applyHealthSupply();
@@ -52,7 +64,7 @@ class HeroTest {
 
     @Test
     void temporaryWeaponRestoreReturnsToDefaultStrategy() {
-        Hero hero = new Hero(100, 200);
+        Hero hero = Hero.getInstance(100, 200);
 
         hero.applyFirepowerSupply(8);
         hero.restoreDefaultWeapon();

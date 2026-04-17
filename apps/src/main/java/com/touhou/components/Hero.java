@@ -15,22 +15,33 @@ import com.touhou.strategy.SpreadShotStrategy;
 
 public class Hero extends Aircraft {
     private static final int HEAL_AMOUNT = 2;
+    private static Hero instance;
 
     private final FireStrategy defaultFireStrategy;
     private final ScheduledExecutorService powerUpScheduler;
 
     private ScheduledFuture<?> restoreFuture;
 
-    public Hero(int x, int y) {
-        this(x, y, Executors.newSingleThreadScheduledExecutor(runnable -> {
+    public static synchronized Hero getInstance(int x, int y) {
+        if (instance == null) {
+            instance = new Hero(x, y, createPowerUpScheduler(), new SingleForwardFireStrategy(-14));
+        }
+        return instance;
+    }
+
+    public static synchronized void resetInstance() {
+        if (instance != null) {
+            instance.shutdown();
+            instance = null;
+        }
+    }
+
+    private static ScheduledExecutorService createPowerUpScheduler() {
+        return Executors.newSingleThreadScheduledExecutor(runnable -> {
             Thread thread = new Thread(runnable, "hero-powerup");
             thread.setDaemon(true);
             return thread;
-        }));
-    }
-
-    Hero(int x, int y, ScheduledExecutorService powerUpScheduler) {
-        this(x, y, powerUpScheduler, new SingleForwardFireStrategy(-14));
+        });
     }
 
     private Hero(int x, int y, ScheduledExecutorService powerUpScheduler, FireStrategy defaultFireStrategy) {
@@ -76,7 +87,13 @@ public class Hero extends Aircraft {
     }
 
     public void shutdown() {
-        powerUpScheduler.shutdownNow();
+        if (restoreFuture != null) {
+            restoreFuture.cancel(false);
+            restoreFuture = null;
+        }
+        if (powerUpScheduler != null && !powerUpScheduler.isShutdown()) {
+            powerUpScheduler.shutdownNow();
+        }
     }
 
     @Override

@@ -88,7 +88,8 @@ public class Game extends JPanel {
         this.leaderboardDao = leaderboardDao;
         this.audioManager = audioManager;
         this.clock = clock;
-        this.hero = new Hero(Layout.WINDOW_WIDTH / 2, Layout.WINDOW_HEIGHT - 120);
+        Hero.resetInstance();
+        this.hero = Hero.getInstance(Layout.WINDOW_WIDTH / 2, Layout.WINDOW_HEIGHT - 120);
         this.enemies = new ArrayList<>();
         this.projectiles = new ArrayList<>();
         this.items = new ArrayList<>();

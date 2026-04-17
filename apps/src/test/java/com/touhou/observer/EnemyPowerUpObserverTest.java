@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.touhou.components.BossEnemy;
@@ -15,6 +17,16 @@ import com.touhou.components.ItemType;
 import com.touhou.components.Projectile;
 
 class EnemyPowerUpObserverTest {
+    @BeforeEach
+    void setUp() {
+        Hero.resetInstance();
+    }
+
+    @AfterEach
+    void tearDown() {
+        Hero.resetInstance();
+    }
+
     @Test
     void bombDestroysRegularEnemiesAndClearsEnemyBullets() {
         List<com.touhou.components.Enemy> enemies = new ArrayList<>();
@@ -24,7 +36,7 @@ class EnemyPowerUpObserverTest {
 
         EnemyPowerUpObserver observer = new EnemyPowerUpObserver(enemies, projectiles, 180);
 
-        observer.onPowerUpActivated(new PowerUpEvent(ItemType.BOMB, new Hero(100, 100)));
+        observer.onPowerUpActivated(new PowerUpEvent(ItemType.BOMB, Hero.getInstance(100, 100)));
 
         assertTrue(enemies.get(0).getHealth() == 0);
         assertTrue(projectiles.isEmpty());
@@ -38,7 +50,7 @@ class EnemyPowerUpObserverTest {
 
         EnemyPowerUpObserver observer = new EnemyPowerUpObserver(enemies, new ArrayList<>(), 120);
 
-        observer.onPowerUpActivated(new PowerUpEvent(ItemType.FREEZE, new Hero(100, 100)));
+        observer.onPowerUpActivated(new PowerUpEvent(ItemType.FREEZE, Hero.getInstance(100, 100)));
 
         assertTrue(bossEnemy.isFrozen());
     }
