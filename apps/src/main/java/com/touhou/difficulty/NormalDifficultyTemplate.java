@@ -17,6 +17,11 @@ public class NormalDifficultyTemplate extends DifficultyTemplate {
     }
 
     @Override
+    protected int enemyProjectileDamage(int baseProjectileDamage, int tickCount) {
+        return baseProjectileDamage + progressionLevel(tickCount) / 3;
+    }
+
+    @Override
     protected boolean hasProgression() {
         return true;
     }

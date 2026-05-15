@@ -60,9 +60,11 @@ public abstract class DifficultyTemplate {
         enemy.setVelocity(adjustedVelocityX, adjustedVelocityY);
         if (enemy.isBoss()) {
             enemy.increaseMaxHealth(bossHealthIncrease(bossSpawnCount));
+            enemy.setProjectileDamage(bossProjectileDamage(enemy.getBaseProjectileDamage(), tickCount, bossSpawnCount));
         } else {
             enemy.increaseMaxHealth(enemyHealthIncrease(tickCount));
             enemy.setFireIntervalTicks(enemyFireIntervalTicks(enemy.getFireIntervalTicks(), tickCount));
+            enemy.setProjectileDamage(enemyProjectileDamage(enemy.getBaseProjectileDamage(), tickCount));
         }
     }
 
@@ -155,6 +157,14 @@ public abstract class DifficultyTemplate {
 
     protected int enemyFireIntervalTicks(int baseFireIntervalTicks, int tickCount) {
         return baseFireIntervalTicks;
+    }
+
+    protected int enemyProjectileDamage(int baseProjectileDamage, int tickCount) {
+        return baseProjectileDamage;
+    }
+
+    protected int bossProjectileDamage(int baseProjectileDamage, int tickCount, int bossSpawnCount) {
+        return enemyProjectileDamage(baseProjectileDamage, tickCount);
     }
 
     protected boolean hasProgression() {

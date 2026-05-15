@@ -57,6 +57,16 @@ public class HardDifficultyTemplate extends DifficultyTemplate {
     }
 
     @Override
+    protected int enemyProjectileDamage(int baseProjectileDamage, int tickCount) {
+        return baseProjectileDamage + 1 + progressionLevel(tickCount) / 2;
+    }
+
+    @Override
+    protected int bossProjectileDamage(int baseProjectileDamage, int tickCount, int bossSpawnCount) {
+        return enemyProjectileDamage(baseProjectileDamage, tickCount) + Math.max(0, bossSpawnCount - 1);
+    }
+
+    @Override
     protected boolean hasProgression() {
         return true;
     }

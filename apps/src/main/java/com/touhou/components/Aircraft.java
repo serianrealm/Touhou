@@ -8,7 +8,8 @@ import com.touhou.strategy.FireStrategy;
 public abstract class Aircraft extends GameCharacter {
     private FireStrategy fireStrategy;
     private final Projectile.Owner projectileOwner;
-    private final int projectileDamage;
+    private final int baseProjectileDamage;
+    private int projectileDamage;
     private final int baseFireIntervalTicks;
     private int fireIntervalTicks;
     private int fireCooldown;
@@ -29,6 +30,7 @@ public abstract class Aircraft extends GameCharacter {
         super(x, y, width, height, velocityX, velocityY, maxHealth, fallbackColor);
         this.fireStrategy = fireStrategy;
         this.projectileOwner = projectileOwner;
+        this.baseProjectileDamage = projectileDamage;
         this.projectileDamage = projectileDamage;
         this.baseFireIntervalTicks = fireIntervalTicks;
         this.fireIntervalTicks = fireIntervalTicks;
@@ -67,6 +69,14 @@ public abstract class Aircraft extends GameCharacter {
 
     public int getProjectileDamage() {
         return projectileDamage;
+    }
+
+    public int getBaseProjectileDamage() {
+        return baseProjectileDamage;
+    }
+
+    public void setProjectileDamage(int projectileDamage) {
+        this.projectileDamage = Math.max(1, projectileDamage);
     }
 
     public int getFireIntervalTicks() {

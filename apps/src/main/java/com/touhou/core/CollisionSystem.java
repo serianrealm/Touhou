@@ -74,7 +74,7 @@ public class CollisionSystem {
             }
 
             if (overlaps(enemy, hero)) {
-                hero.applyDamage(1);
+                hero.vanish();
                 scoreGained += enemy.getScoreValue();
                 droppedItems.addAll(ItemFactory.createDrops(enemy, random));
                 enemyIterator.remove();

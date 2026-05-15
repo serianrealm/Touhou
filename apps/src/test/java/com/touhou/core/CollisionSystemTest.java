@@ -1,6 +1,7 @@
 package com.touhou.core;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -85,6 +86,25 @@ class CollisionSystemTest {
 
         assertEquals(hero.getMaxHealth() - 1, hero.getHealth());
         assertTrue(items.isEmpty());
+    }
+
+    @Test
+    void enemyBodyCollisionImmediatelyKillsHero() {
+        CollisionSystem collisionSystem = new CollisionSystem(
+                new AudioManager(),
+                new ItemEffectContext(new AudioManager(), new NormalDifficultyTemplate(), new PowerUpDispatcher()),
+                new Random(0));
+        Hero hero = Hero.getInstance(200, 400);
+        List<Enemy> enemies = new ArrayList<>();
+        List<Projectile> projectiles = new ArrayList<>();
+        List<Item> items = new ArrayList<>();
+        Enemy enemy = new com.touhou.components.MobEnemy(hero.getX(), 0);
+        enemy.setPosition(hero.getX(), hero.getY());
+        enemies.add(enemy);
+
+        collisionSystem.resolve(hero, enemies, projectiles, items);
+
+        assertFalse(hero.isAlive());
     }
 
     @Test

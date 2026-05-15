@@ -31,6 +31,8 @@ abstract class DifficultyTemplate <<Abstract Class>> {
   # bossHealthIncrease(bossSpawnCount: int): int
   # heroFireIntervalTicks(base: int, tickCount: int): int
   # enemyFireIntervalTicks(base: int, tickCount: int): int
+  # enemyProjectileDamage(base: int, tickCount: int): int
+  # bossProjectileDamage(base: int, tickCount: int, bossSpawnCount: int): int
 }
 
 class EasyDifficultyTemplate

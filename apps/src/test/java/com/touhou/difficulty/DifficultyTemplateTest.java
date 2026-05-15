@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 import com.touhou.components.BossEnemy;
+import com.touhou.components.EliteEnemy;
 
 class DifficultyTemplateTest {
     @Test
@@ -58,5 +59,39 @@ class DifficultyTemplateTest {
 
         assertTrue(normal.enemySpawnIntervalTicks(1200) < normal.enemySpawnIntervalTicks(0));
         assertTrue(hard.enemySpawnIntervalTicks(1200) < hard.enemySpawnIntervalTicks(0));
+    }
+
+    @Test
+    void hardDifficultyImprovesEnemyProjectileDamage() {
+        DifficultyTemplate hard = new HardDifficultyTemplate();
+        EliteEnemy enemy = new EliteEnemy(300, 0, 3);
+
+        hard.configureEnemy(enemy, 0, 1);
+
+        assertTrue(enemy.getProjectileDamage() > enemy.getBaseProjectileDamage());
+    }
+
+    @Test
+    void normalDifficultyProjectileDamageScalesLater() {
+        DifficultyTemplate normal = new NormalDifficultyTemplate();
+        EliteEnemy earlyEnemy = new EliteEnemy(300, 0, 3);
+        EliteEnemy lateEnemy = new EliteEnemy(300, 0, 3);
+
+        normal.configureEnemy(earlyEnemy, 0, 1);
+        normal.configureEnemy(lateEnemy, 1800, 1);
+
+        assertTrue(lateEnemy.getProjectileDamage() > earlyEnemy.getProjectileDamage());
+    }
+
+    @Test
+    void hardBossProjectileDamageImprovesAcrossSpawns() {
+        DifficultyTemplate hard = new HardDifficultyTemplate();
+        BossEnemy firstBoss = new BossEnemy(300, 3);
+        BossEnemy laterBoss = new BossEnemy(300, 3);
+
+        hard.configureEnemy(firstBoss, 0, 1);
+        hard.configureEnemy(laterBoss, 0, 3);
+
+        assertTrue(laterBoss.getProjectileDamage() > firstBoss.getProjectileDamage());
     }
 }
