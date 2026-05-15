@@ -2,7 +2,12 @@ package com.touhou.difficulty;
 
 public class EasyDifficultyTemplate extends DifficultyTemplate {
     @Override
-    protected int enemySpawnIntervalDelta() {
+    public boolean canSpawnBoss() {
+        return false;
+    }
+
+    @Override
+    protected int enemySpawnIntervalDelta(int tickCount) {
         return 14;
     }
 
@@ -32,7 +37,22 @@ public class EasyDifficultyTemplate extends DifficultyTemplate {
     }
 
     @Override
-    protected double enemySpeedMultiplier() {
+    protected double enemySpeedMultiplier(int tickCount) {
         return 0.85;
+    }
+
+    @Override
+    protected int heroFireIntervalTicks(int baseFireIntervalTicks, int tickCount) {
+        return Math.max(5, baseFireIntervalTicks - 2);
+    }
+
+    @Override
+    protected int enemyFireIntervalTicks(int baseFireIntervalTicks, int tickCount) {
+        return baseFireIntervalTicks + 12;
+    }
+
+    @Override
+    protected int[] enemyFactoryWeights() {
+        return new int[] {7, 2, 1, 0};
     }
 }

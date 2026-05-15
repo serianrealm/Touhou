@@ -2,16 +2,20 @@ package com.touhou.core;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GraphicsEnvironment;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 import javax.swing.AbstractAction;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import com.touhou.audio.AudioManager;
@@ -20,6 +24,7 @@ import com.touhou.components.Hero;
 import com.touhou.components.Item;
 import com.touhou.components.Projectile;
 import com.touhou.difficulty.DifficultyTemplate;
+import com.touhou.difficulty.GameLoopContext;
 import com.touhou.leaderboard.FileLeaderboardDao;
 import com.touhou.leaderboard.GameDifficulty;
 import com.touhou.leaderboard.LeaderboardDao;
@@ -50,10 +55,13 @@ public class Game extends JPanel {
     private final LeaderboardDao leaderboardDao;
     private final Clock clock;
     private final AudioManager audioManager;
+    private final Consumer<GameDifficulty> gameOverCallback;
 
     private int tickCount;
     private int score;
     private boolean gameOverHandled;
+    private boolean bossMusicActive;
+    private int reportedDifficultyLevel;
     private List<LeaderboardEntry> leaderboardEntries;
 
     public Game() {
@@ -66,11 +74,21 @@ public class Game extends JPanel {
                 playerName,
                 new FileLeaderboardDao(Path.of(System.getProperty("touhou.leaderboardDir", "leaderboards"))),
                 new AudioManager(),
+                null,
                 Clock.systemDefaultZone());
     }
 
     public Game(GameDifficulty difficulty, String playerName, LeaderboardDao leaderboardDao, AudioManager audioManager) {
-        this(difficulty, playerName, leaderboardDao, audioManager, Clock.systemDefaultZone());
+        this(difficulty, playerName, leaderboardDao, audioManager, null, Clock.systemDefaultZone());
+    }
+
+    public Game(
+            GameDifficulty difficulty,
+            String playerName,
+            LeaderboardDao leaderboardDao,
+            AudioManager audioManager,
+            Consumer<GameDifficulty> gameOverCallback) {
+        this(difficulty, playerName, leaderboardDao, audioManager, gameOverCallback, Clock.systemDefaultZone());
     }
 
     Game(
@@ -78,6 +96,7 @@ public class Game extends JPanel {
             String playerName,
             LeaderboardDao leaderboardDao,
             AudioManager audioManager,
+            Consumer<GameDifficulty> gameOverCallback,
             Clock clock) {
         setDoubleBuffered(true);
         setFocusable(true);
@@ -87,6 +106,7 @@ public class Game extends JPanel {
         this.playerName = playerName;
         this.leaderboardDao = leaderboardDao;
         this.audioManager = audioManager;
+        this.gameOverCallback = gameOverCallback;
         this.clock = clock;
         Hero.resetInstance();
         this.hero = Hero.getInstance(Layout.WINDOW_WIDTH / 2, Layout.WINDOW_HEIGHT - 120);
@@ -103,7 +123,7 @@ public class Game extends JPanel {
 
         characterSystem = new CharacterSystem(this, hero, enemies, projectiles, items, difficultyTemplate);
         collisionSystem = new CollisionSystem(audioManager, itemEffectContext);
-        gameUI = new GameUI();
+        gameUI = new GameUI(difficulty);
         timer = new Timer(1000 / TICKS_PER_SECOND, event -> {
             tick();
             repaint();
@@ -133,8 +153,8 @@ public class Game extends JPanel {
         }
 
         tickCount++;
-        characterSystem.onTick(Layout.WINDOW_WIDTH, Layout.WINDOW_HEIGHT, score);
-        score += collisionSystem.resolve(hero, enemies, projectiles, items);
+        score += difficultyTemplate.action(new GameLoopContext(this, characterSystem, collisionSystem, tickCount, score));
+        updateBossMusic();
 
         if (!hero.isAlive()) {
             handleGameOver();
@@ -185,6 +205,26 @@ public class Game extends JPanel {
         return audioManager.isMuted();
     }
 
+    public List<Enemy> mutableEnemies() {
+        return enemies;
+    }
+
+    public List<Projectile> mutableProjectiles() {
+        return projectiles;
+    }
+
+    public List<Item> mutableItems() {
+        return items;
+    }
+
+    public int getReportedDifficultyLevel() {
+        return reportedDifficultyLevel;
+    }
+
+    public void setReportedDifficultyLevel(int reportedDifficultyLevel) {
+        this.reportedDifficultyLevel = reportedDifficultyLevel;
+    }
+
     @Override
     protected void paintComponent(Graphics graphics) {
         super.paintComponent(graphics);
@@ -217,17 +257,24 @@ public class Game extends JPanel {
         gameOverHandled = true;
         stop();
         audioManager.stopBackground();
+        bossMusicActive = false;
         audioManager.playEffect("/audios/game_over.wav");
         hero.shutdown();
 
         try {
-            LeaderboardEntry currentSession = new LeaderboardEntry(playerName, score, LocalDateTime.now(clock));
-            leaderboardDao.save(difficulty, currentSession);
+            LeaderboardEntry currentSession = createSessionEntry();
+            if (currentSession != null) {
+                leaderboardDao.save(difficulty, currentSession);
+            }
             leaderboardEntries = leaderboardDao.findAll(difficulty);
             System.out.println(LeaderboardPresenter.format(difficulty, leaderboardEntries, LEADERBOARD_LIMIT));
         } catch (RuntimeException exception) {
             leaderboardEntries = List.of();
             System.err.println("Failed to update leaderboard: " + exception.getMessage());
+        }
+
+        if (gameOverCallback != null) {
+            SwingUtilities.invokeLater(() -> gameOverCallback.accept(difficulty));
         }
     }
 
@@ -239,16 +286,49 @@ public class Game extends JPanel {
                 audioManager.toggleMuted();
                 if (audioManager.isMuted()) {
                     audioManager.stopBackground();
+                    bossMusicActive = false;
                 } else if (!gameOverHandled) {
-                    audioManager.playBackgroundLoop("/audios/bgm.wav");
+                    bossMusicActive = enemies.stream().anyMatch(Enemy::isBoss);
+                    audioManager.playBackgroundLoop(bossMusicActive ? "/audios/bgm_boss.wav" : "/audios/bgm.wav");
                 }
                 repaint();
             }
         });
     }
 
+    private void updateBossMusic() {
+        boolean bossPresent = enemies.stream().anyMatch(Enemy::isBoss);
+        if (bossPresent == bossMusicActive || audioManager.isMuted()) {
+            return;
+        }
+        bossMusicActive = bossPresent;
+        audioManager.playBackgroundLoop(bossPresent ? "/audios/bgm_boss.wav" : "/audios/bgm.wav");
+    }
+
     private static String defaultPlayerName() {
         String systemPlayerName = System.getProperty("user.name", "Player").trim();
         return systemPlayerName.isEmpty() ? "Player" : systemPlayerName;
+    }
+
+    private LeaderboardEntry createSessionEntry() {
+        if (GraphicsEnvironment.isHeadless() || !isDisplayable()) {
+            return new LeaderboardEntry(playerName, score, LocalDateTime.now(clock));
+        }
+
+        int saveResult = JOptionPane.showConfirmDialog(
+                this,
+                "Save this score?",
+                "Game Over",
+                JOptionPane.YES_NO_OPTION);
+        if (saveResult != JOptionPane.YES_OPTION) {
+            return null;
+        }
+
+        String enteredName = JOptionPane.showInputDialog(this, "Player name", playerName);
+        String normalizedName = enteredName == null ? "" : enteredName.trim();
+        if (normalizedName.isEmpty()) {
+            normalizedName = "Player";
+        }
+        return new LeaderboardEntry(normalizedName, score, LocalDateTime.now(clock));
     }
 }

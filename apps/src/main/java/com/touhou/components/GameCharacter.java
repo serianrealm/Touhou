@@ -10,7 +10,7 @@ public abstract class GameCharacter {
     private int height;
     private int velocityX;
     private int velocityY;
-    private final int maxHealth;
+    private int maxHealth;
     private int health;
     private final Color fallbackColor;
 
@@ -59,6 +59,12 @@ public abstract class GameCharacter {
 
     public void heal(int amount) {
         health = Math.min(maxHealth, health + Math.max(0, amount));
+    }
+
+    public void increaseMaxHealth(int amount) {
+        int increase = Math.max(0, amount);
+        maxHealth += increase;
+        health += increase;
     }
 
     public void vanish() {

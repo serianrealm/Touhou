@@ -28,7 +28,7 @@ public class AppController {
     }
 
     public void startGame(GameDifficulty difficulty, String playerName) {
-        Game game = new Game(difficulty, playerName, leaderboardDao, audioManager);
+        Game game = new Game(difficulty, playerName, leaderboardDao, audioManager, this::showLeaderboard);
         layout.showPanel(game);
         game.start();
     }

@@ -10,6 +10,7 @@ public class Projectile extends GameCharacter {
 
     private final int damage;
     private final Owner owner;
+    private int frozenTicks;
 
     public Projectile(int x, int y, int velocityX, int velocityY, int damage, Owner owner) {
         super(
@@ -37,6 +38,23 @@ public class Projectile extends GameCharacter {
 
     public Owner getOwner() {
         return owner;
+    }
+
+    @Override
+    public void tick() {
+        if (frozenTicks > 0) {
+            frozenTicks--;
+            return;
+        }
+        super.tick();
+    }
+
+    public void freeze(int ticks) {
+        frozenTicks = Math.max(frozenTicks, ticks);
+    }
+
+    public boolean isFrozen() {
+        return frozenTicks > 0;
     }
 
     @Override

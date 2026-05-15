@@ -64,7 +64,7 @@ class GameTest {
                 new NormalDifficultyTemplate(),
                 new Random(0));
 
-        characterSystem.onTick(1920, 1080, 30);
+        characterSystem.onTick(1920, 1080, 30, 1);
 
         assertTrue(enemies.stream().anyMatch(Enemy::isBoss));
     }
@@ -94,6 +94,10 @@ class GameTest {
         @Override
         public List<LeaderboardEntry> findAll(GameDifficulty difficulty) {
             return List.of();
+        }
+
+        @Override
+        public void delete(GameDifficulty difficulty, LeaderboardEntry entry) {
         }
     }
 }

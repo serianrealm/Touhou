@@ -34,4 +34,9 @@ public class EliteEnemy extends Enemy {
     public String getSpriteResource() {
         return "/textures/elite.png";
     }
+
+    @Override
+    public boolean isElite() {
+        return true;
+    }
 }

@@ -34,6 +34,7 @@ public class CharacterSystem {
     private int targetX;
     private int targetY;
     private int nextBossScoreThreshold;
+    private int bossSpawnCount;
 
     public CharacterSystem(
             JComponent inputSurface,
@@ -84,8 +85,8 @@ public class CharacterSystem {
         inputSurface.addMouseMotionListener(mouseAdapter);
     }
 
-    public void onTick(int playfieldWidth, int playfieldHeight, int score) {
-        ticks++;
+    public void onTick(int playfieldWidth, int playfieldHeight, int score, int tickCount) {
+        ticks = tickCount;
 
         hero.tick();
         hero.moveTo(
@@ -118,22 +119,42 @@ public class CharacterSystem {
 
     private void spawnEnemies(int playfieldWidth, int score) {
         boolean bossPresent = enemies.stream().anyMatch(Enemy::isBoss);
-        if (!bossPresent && score >= nextBossScoreThreshold) {
+        if (difficultyTemplate.shouldSpawnBoss(bossPresent, score, nextBossScoreThreshold)) {
             Enemy boss = bossEnemyFactory.createEnemy(random, playfieldWidth);
-            difficultyTemplate.configureEnemy(boss);
+            bossSpawnCount++;
+            difficultyTemplate.configureEnemy(boss, ticks, bossSpawnCount);
             enemies.add(boss);
             nextBossScoreThreshold += difficultyTemplate.bossThresholdStep();
             return;
         }
 
         long nonBossCount = enemies.stream().filter(enemy -> !enemy.isBoss()).count();
-        if (ticks % difficultyTemplate.enemySpawnIntervalTicks() == 0
+        if (ticks % difficultyTemplate.enemySpawnIntervalTicks(ticks) == 0
                 && nonBossCount < difficultyTemplate.maxNonBossEnemies()) {
-            EnemyFactory enemyFactory = enemyFactories.get(random.nextInt(enemyFactories.size()));
+            EnemyFactory enemyFactory = selectEnemyFactory();
             Enemy enemy = enemyFactory.createEnemy(random, playfieldWidth);
-            difficultyTemplate.configureEnemy(enemy);
+            difficultyTemplate.configureEnemy(enemy, ticks, bossSpawnCount);
             enemies.add(enemy);
         }
+    }
+
+    private EnemyFactory selectEnemyFactory() {
+        int totalWeight = 0;
+        for (int index = 0; index < enemyFactories.size(); index++) {
+            totalWeight += difficultyTemplate.enemyFactoryWeight(index);
+        }
+        if (totalWeight <= 0) {
+            return enemyFactories.get(0);
+        }
+
+        int roll = random.nextInt(totalWeight);
+        for (int index = 0; index < enemyFactories.size(); index++) {
+            roll -= difficultyTemplate.enemyFactoryWeight(index);
+            if (roll < 0) {
+                return enemyFactories.get(index);
+            }
+        }
+        return enemyFactories.get(0);
     }
 
     private void updateTarget(int x, int y) {

@@ -26,4 +26,9 @@ public class MobEnemy extends Enemy {
     public String getSpriteResource() {
         return "/textures/mob.png";
     }
+
+    @Override
+    public boolean isMob() {
+        return true;
+    }
 }

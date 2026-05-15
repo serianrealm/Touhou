@@ -1,0 +1,46 @@
+@startuml
+' Project example: bomb and freeze power-up effects
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+left to right direction
+
+title Observer Pattern Structural Class Diagram
+
+class BombItem <<Concrete Subject>>
+class FreezeItem <<Concrete Subject>>
+
+class PowerUpDispatcher <<Subject>> {
+  - observers: List<PowerUpObserver>
+  + addObserver(observer: PowerUpObserver): void
+  + removeObserver(observer: PowerUpObserver): void
+  + notifyObservers(event: PowerUpEvent): void
+}
+
+interface PowerUpObserver <<Observer>> {
+  + onPowerUpActivated(event: PowerUpEvent): void
+}
+
+class EnemyPowerUpObserver <<Concrete Observer>>
+class AudioPowerUpObserver <<Concrete Observer>>
+
+class PowerUpEvent {
+  + type: ItemType
+  + hero: Hero
+}
+
+abstract class Enemy
+class Projectile
+class AudioManager
+
+BombItem ..> PowerUpDispatcher : notify BOMB
+FreezeItem ..> PowerUpDispatcher : notify FREEZE
+PowerUpDispatcher o-- PowerUpObserver
+PowerUpObserver <|.. EnemyPowerUpObserver
+PowerUpObserver <|.. AudioPowerUpObserver
+EnemyPowerUpObserver ..> Enemy : bomb/freeze effects
+EnemyPowerUpObserver ..> Projectile : clear/freeze enemy bullets
+AudioPowerUpObserver ..> AudioManager : play effect
+PowerUpDispatcher ..> PowerUpEvent
+
+@enduml

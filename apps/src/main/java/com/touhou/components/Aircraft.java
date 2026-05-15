@@ -9,7 +9,8 @@ public abstract class Aircraft extends GameCharacter {
     private FireStrategy fireStrategy;
     private final Projectile.Owner projectileOwner;
     private final int projectileDamage;
-    private final int fireIntervalTicks;
+    private final int baseFireIntervalTicks;
+    private int fireIntervalTicks;
     private int fireCooldown;
 
     protected Aircraft(
@@ -29,6 +30,7 @@ public abstract class Aircraft extends GameCharacter {
         this.fireStrategy = fireStrategy;
         this.projectileOwner = projectileOwner;
         this.projectileDamage = projectileDamage;
+        this.baseFireIntervalTicks = fireIntervalTicks;
         this.fireIntervalTicks = fireIntervalTicks;
         this.fireCooldown = 0;
     }
@@ -65,5 +67,17 @@ public abstract class Aircraft extends GameCharacter {
 
     public int getProjectileDamage() {
         return projectileDamage;
+    }
+
+    public int getFireIntervalTicks() {
+        return fireIntervalTicks;
+    }
+
+    public int getBaseFireIntervalTicks() {
+        return baseFireIntervalTicks;
+    }
+
+    public void setFireIntervalTicks(int fireIntervalTicks) {
+        this.fireIntervalTicks = Math.max(1, fireIntervalTicks);
     }
 }

@@ -41,4 +41,18 @@ class FileLeaderboardDaoTest {
 
         assertEquals(List.of("Youmu", "Sakuya", "Alice"), entries.stream().map(LeaderboardEntry::playerName).toList());
     }
+
+    @Test
+    void deletesSelectedEntryForOneDifficulty() {
+        FileLeaderboardDao dao = new FileLeaderboardDao(tempDir);
+        LeaderboardEntry easyEntry = new LeaderboardEntry("Reimu", 15, LocalDateTime.of(2026, 4, 17, 10, 0));
+        LeaderboardEntry normalEntry = new LeaderboardEntry("Marisa", 30, LocalDateTime.of(2026, 4, 17, 10, 5));
+
+        dao.save(GameDifficulty.EASY, easyEntry);
+        dao.save(GameDifficulty.NORMAL, normalEntry);
+        dao.delete(GameDifficulty.EASY, easyEntry);
+
+        assertEquals(List.of(), dao.findAll(GameDifficulty.EASY));
+        assertEquals(List.of(normalEntry), dao.findAll(GameDifficulty.NORMAL));
+    }
 }

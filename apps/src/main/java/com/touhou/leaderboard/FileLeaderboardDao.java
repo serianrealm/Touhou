@@ -70,11 +70,36 @@ public class FileLeaderboardDao implements LeaderboardDao {
         }
     }
 
+    @Override
+    public void delete(GameDifficulty difficulty, LeaderboardEntry entry) {
+        Path storagePath = resolveStoragePath(difficulty);
+        if (!Files.exists(storagePath)) {
+            return;
+        }
+
+        try {
+            List<LeaderboardEntry> remainingEntries = new ArrayList<>(findAll(difficulty));
+            remainingEntries.remove(entry);
+            Files.write(
+                    storagePath,
+                    remainingEntries.stream()
+                            .map(this::formatLine)
+                            .toList(),
+                    StandardCharsets.UTF_8);
+        } catch (IOException exception) {
+            throw new UncheckedIOException("Failed to delete leaderboard entry", exception);
+        }
+    }
+
     private Path resolveStoragePath(GameDifficulty difficulty) {
         return baseDirectory.resolve("leaderboard-" + difficulty.getFileKey() + ".tsv");
     }
 
     private String sanitize(String playerName) {
         return playerName.replace('\t', ' ').trim();
+    }
+
+    private String formatLine(LeaderboardEntry entry) {
+        return sanitize(entry.playerName()) + SEPARATOR + entry.score() + SEPARATOR + entry.playedAt();
     }
 }

@@ -27,7 +27,11 @@ public class GameUI {
     private final Map<String, BufferedImage> imageCache;
 
     public GameUI() {
-        backgroundImage = loadImage("/textures/bg.jpg");
+        this(GameDifficulty.NORMAL);
+    }
+
+    public GameUI(GameDifficulty difficulty) {
+        backgroundImage = loadImage(backgroundResource(difficulty));
         imageCache = new HashMap<>();
     }
 
@@ -159,5 +163,13 @@ public class GameUI {
 
     private String truncate(String value, int maxLength) {
         return value.length() <= maxLength ? value : value.substring(0, maxLength);
+    }
+
+    private String backgroundResource(GameDifficulty difficulty) {
+        return switch (difficulty) {
+            case EASY -> "/textures/bg2.jpg";
+            case NORMAL -> "/textures/bg.jpg";
+            case HARD -> "/textures/bg3.jpg";
+        };
     }
 }

@@ -11,6 +11,10 @@ public abstract class Enemy extends Aircraft {
     private final List<ItemType> droppableItems;
 
     private int frozenTicks;
+    private int slowTicks;
+    private int savedVelocityX;
+    private int savedVelocityY;
+    private boolean dropsSuppressed;
 
     protected Enemy(
             int x,
@@ -65,10 +69,25 @@ public abstract class Enemy extends Aircraft {
         return false;
     }
 
+    public void destroyWithoutDrop() {
+        dropsSuppressed = true;
+        vanish();
+    }
+
+    public boolean canDropItems() {
+        return !dropsSuppressed;
+    }
+
     public final void advance(int playfieldWidth, int playfieldHeight) {
         if (frozenTicks > 0) {
             frozenTicks--;
             return;
+        }
+        if (slowTicks > 0) {
+            slowTicks--;
+            if (slowTicks == 0) {
+                setVelocity(savedVelocityX, savedVelocityY);
+            }
         }
         advanceNormally(playfieldWidth, playfieldHeight);
     }
@@ -79,6 +98,38 @@ public abstract class Enemy extends Aircraft {
 
     public boolean isFrozen() {
         return frozenTicks > 0;
+    }
+
+    public void slow(int ticks, double multiplier) {
+        if (ticks <= 0 || multiplier <= 0.0 || multiplier >= 1.0) {
+            return;
+        }
+        if (slowTicks <= 0) {
+            savedVelocityX = getVelocityX();
+            savedVelocityY = getVelocityY();
+        }
+        setVelocity((int) Math.round(savedVelocityX * multiplier), Math.max(1, (int) Math.round(savedVelocityY * multiplier)));
+        slowTicks = Math.max(slowTicks, ticks);
+    }
+
+    public boolean isSlowed() {
+        return slowTicks > 0;
+    }
+
+    public boolean isMob() {
+        return false;
+    }
+
+    public boolean isElite() {
+        return false;
+    }
+
+    public boolean isElitePlus() {
+        return false;
+    }
+
+    public boolean isAce() {
+        return false;
     }
 
     protected void bounceHorizontally(int playfieldWidth) {

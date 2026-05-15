@@ -12,6 +12,7 @@ class Game <<Client>>
 interface LeaderboardDao <<DAO>> {
   + save(difficulty: GameDifficulty, entry: LeaderboardEntry): void
   + findAll(difficulty: GameDifficulty): List<LeaderboardEntry>
+  + delete(difficulty: GameDifficulty, entry: LeaderboardEntry): void
 }
 
 class FileLeaderboardDao

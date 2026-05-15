@@ -6,4 +6,6 @@ public interface LeaderboardDao {
     void save(GameDifficulty difficulty, LeaderboardEntry entry);
 
     List<LeaderboardEntry> findAll(GameDifficulty difficulty);
+
+    void delete(GameDifficulty difficulty, LeaderboardEntry entry);
 }

@@ -1,0 +1,55 @@
+@startuml
+' Project example: game difficulty loop
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+left to right direction
+
+title Template Method Pattern Structural Class Diagram
+
+class Game <<Client>> {
+  + tick(): void
+}
+
+class GameLoopContext {
+  + game: Game
+  + characterSystem: CharacterSystem
+  + collisionSystem: CollisionSystem
+  + tickCount: int
+  + score: int
+}
+
+abstract class DifficultyTemplate <<Abstract Class>> {
+  + {final} action(context: GameLoopContext): int
+  + {final} configureEnemy(enemy: Enemy, tickCount: int, bossSpawnCount: int): void
+  + {final} shouldSpawnBoss(bossPresent: boolean, score: int, threshold: int): boolean
+  # canSpawnBoss(): boolean
+  # enemySpawnIntervalDelta(tickCount: int): int
+  # enemySpeedMultiplier(tickCount: int): double
+  # enemyFactoryWeights(): int[]
+  # enemyHealthIncrease(tickCount: int): int
+  # bossHealthIncrease(bossSpawnCount: int): int
+  # heroFireIntervalTicks(base: int, tickCount: int): int
+  # enemyFireIntervalTicks(base: int, tickCount: int): int
+}
+
+class EasyDifficultyTemplate
+class NormalDifficultyTemplate
+class HardDifficultyTemplate
+
+class CharacterSystem
+class CollisionSystem
+abstract class Enemy
+
+Game ..> DifficultyTemplate : delegates tick
+Game ..> GameLoopContext : creates
+DifficultyTemplate ..> GameLoopContext
+DifficultyTemplate ..> CharacterSystem : fixed step
+DifficultyTemplate ..> CollisionSystem : fixed step
+DifficultyTemplate ..> Enemy : configure hook output
+
+DifficultyTemplate <|-- EasyDifficultyTemplate
+DifficultyTemplate <|-- NormalDifficultyTemplate
+DifficultyTemplate <|-- HardDifficultyTemplate
+
+@enduml

@@ -14,7 +14,8 @@ import com.touhou.strategy.SingleForwardFireStrategy;
 import com.touhou.strategy.SpreadShotStrategy;
 
 public class Hero extends Aircraft {
-    private static final int HEAL_AMOUNT = 2;
+    private static final int MAX_HEALTH = 100;
+    private static final int HEAL_AMOUNT = 10;
     private static Hero instance;
 
     private final FireStrategy defaultFireStrategy;
@@ -52,7 +53,7 @@ public class Hero extends Aircraft {
                 96,
                 0,
                 0,
-                8,
+                MAX_HEALTH,
                 new Color(102, 217, 255),
                 Projectile.Owner.HERO,
                 1,

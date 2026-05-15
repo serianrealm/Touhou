@@ -1,10 +1,33 @@
 package com.touhou.difficulty;
 
 import com.touhou.components.Enemy;
+import com.touhou.components.Hero;
 
 public abstract class DifficultyTemplate {
+    private static final int PROGRESSION_INTERVAL_TICKS = 600;
+
+    public final int action(GameLoopContext context) {
+        beforeCharactersAdvance(context);
+        context.characterSystem().onTick(
+                context.playfieldWidth(),
+                context.playfieldHeight(),
+                context.score(),
+                context.tickCount());
+        int scoreGained = context.collisionSystem().resolve(
+                context.game().getHero(),
+                context.game().mutableEnemies(),
+                context.game().mutableProjectiles(),
+                context.game().mutableItems());
+        afterCollisions(context, scoreGained);
+        return scoreGained;
+    }
+
     public final int enemySpawnIntervalTicks() {
-        return Math.max(12, baseEnemySpawnIntervalTicks() + enemySpawnIntervalDelta());
+        return enemySpawnIntervalTicks(0);
+    }
+
+    public final int enemySpawnIntervalTicks(int tickCount) {
+        return Math.max(12, baseEnemySpawnIntervalTicks() + enemySpawnIntervalDelta(tickCount));
     }
 
     public final int maxNonBossEnemies() {
@@ -28,9 +51,42 @@ public abstract class DifficultyTemplate {
     }
 
     public final void configureEnemy(Enemy enemy) {
-        int adjustedVelocityX = scaleVelocity(enemy.getVelocityX(), enemySpeedMultiplier());
-        int adjustedVelocityY = Math.max(1, scaleVelocity(enemy.getVelocityY(), enemySpeedMultiplier()));
+        configureEnemy(enemy, 0, 1);
+    }
+
+    public final void configureEnemy(Enemy enemy, int tickCount, int bossSpawnCount) {
+        int adjustedVelocityX = scaleVelocity(enemy.getVelocityX(), enemySpeedMultiplier(tickCount));
+        int adjustedVelocityY = Math.max(1, scaleVelocity(enemy.getVelocityY(), enemySpeedMultiplier(tickCount)));
         enemy.setVelocity(adjustedVelocityX, adjustedVelocityY);
+        if (enemy.isBoss()) {
+            enemy.increaseMaxHealth(bossHealthIncrease(bossSpawnCount));
+        } else {
+            enemy.increaseMaxHealth(enemyHealthIncrease(tickCount));
+            enemy.setFireIntervalTicks(enemyFireIntervalTicks(enemy.getFireIntervalTicks(), tickCount));
+        }
+    }
+
+    public final boolean shouldSpawnBoss(boolean bossPresent, int score, int nextBossScoreThreshold) {
+        return canSpawnBoss() && !bossPresent && score >= nextBossScoreThreshold;
+    }
+
+    public final int enemyFactoryWeight(int factoryIndex) {
+        int[] weights = enemyFactoryWeights();
+        if (factoryIndex < 0 || factoryIndex >= weights.length) {
+            return 0;
+        }
+        return Math.max(0, weights[factoryIndex]);
+    }
+
+    public final int progressionLevel(int tickCount) {
+        if (!hasProgression()) {
+            return 0;
+        }
+        return Math.max(0, tickCount / PROGRESSION_INTERVAL_TICKS);
+    }
+
+    public boolean canSpawnBoss() {
+        return true;
     }
 
     protected int baseEnemySpawnIntervalTicks() {
@@ -57,7 +113,7 @@ public abstract class DifficultyTemplate {
         return 8;
     }
 
-    protected int enemySpawnIntervalDelta() {
+    protected int enemySpawnIntervalDelta(int tickCount) {
         return 0;
     }
 
@@ -81,8 +137,45 @@ public abstract class DifficultyTemplate {
         return 0;
     }
 
-    protected double enemySpeedMultiplier() {
+    protected double enemySpeedMultiplier(int tickCount) {
         return 1.0;
+    }
+
+    protected int enemyHealthIncrease(int tickCount) {
+        return 0;
+    }
+
+    protected int bossHealthIncrease(int bossSpawnCount) {
+        return 0;
+    }
+
+    protected int heroFireIntervalTicks(int baseFireIntervalTicks, int tickCount) {
+        return baseFireIntervalTicks;
+    }
+
+    protected int enemyFireIntervalTicks(int baseFireIntervalTicks, int tickCount) {
+        return baseFireIntervalTicks;
+    }
+
+    protected boolean hasProgression() {
+        return false;
+    }
+
+    protected int[] enemyFactoryWeights() {
+        return new int[] {4, 3, 2, 1};
+    }
+
+    protected void afterCollisions(GameLoopContext context, int scoreGained) {
+    }
+
+    private void beforeCharactersAdvance(GameLoopContext context) {
+        Hero hero = context.game().getHero();
+        hero.setFireIntervalTicks(heroFireIntervalTicks(hero.getBaseFireIntervalTicks(), context.tickCount()));
+        int level = progressionLevel(context.tickCount());
+        if (level > context.game().getReportedDifficultyLevel()) {
+            context.game().setReportedDifficultyLevel(level);
+            System.out.println(context.game().getDifficulty().getDisplayName() + " difficulty increased to level " + level);
+        }
     }
 
     private int scaleVelocity(int velocity, double multiplier) {

@@ -34,4 +34,9 @@ public class AceEnemy extends Enemy {
     public String getSpriteResource() {
         return "/textures/elitePro.png";
     }
+
+    @Override
+    public boolean isAce() {
+        return true;
+    }
 }

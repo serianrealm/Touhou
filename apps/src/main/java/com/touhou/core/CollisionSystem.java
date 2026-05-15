@@ -66,7 +66,9 @@ public class CollisionSystem {
             Enemy enemy = enemyIterator.next();
             if (!enemy.isAlive()) {
                 scoreGained += enemy.getScoreValue();
-                droppedItems.addAll(ItemFactory.createDrops(enemy, random));
+                if (enemy.canDropItems()) {
+                    droppedItems.addAll(ItemFactory.createDrops(enemy, random));
+                }
                 enemyIterator.remove();
                 continue;
             }
